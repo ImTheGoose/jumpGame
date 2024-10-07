@@ -56,6 +56,7 @@ function setup() {
   }
   xposNu = spawnXY[0];
   yposNu = spawnXY[1];
+  frameRate(63)
 
   boxGen(0,1550,3200,50,2)
   boxGen(0,0,50,1600,2)
