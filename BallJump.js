@@ -1,4 +1,7 @@
+debugHUD = true; //Enables or disables debug hub
 debug1 = false; //Visualise spots in ranPos
+debug2 = true; //Visualise hitboxes
+
 
 highscore = 0;
 score = 0;
@@ -18,6 +21,8 @@ xh = 0
 xposNu = 100;
 yposNu = 100;
 
+colCheck = [false, false, false, false, false];
+
 boxX = [];
 boxY = [];
 boxWidth = [];
@@ -32,7 +37,7 @@ spawnXY = [windowSize[0]/2,windowSize[1]-150]
 
 
 
-pointDistance = 60;
+pointDistance = 80;
 pointAtOnce = 5;
 
 gameStarted = false;
@@ -71,10 +76,10 @@ function setup() {
 
   for (let i = 0; i < pointAtOnce; i++){
     p = ranPos();
-    boxGen(p[0],p[1],50,50, 4)
+    boxGen(p[0],p[1],75,75, 4)
   }
 
-  //frameRate(200);
+
 
 }
 
@@ -82,12 +87,16 @@ function draw() {
   background(35);
   fill(100)
 
+  //Bugfix for ghosting through wall. DONT REMOVE. Phasing happens when float is an integer.
+  xposNu += 0.0000000000001;
+  yposNu += 0.0000000000001;
 
 
   //rect(0,580,800,50,255)
 
   if (debug1){
     ranPos(debug1)
+    frameRate(200);
   }
 
 
@@ -113,7 +122,23 @@ function drawHUD(){
   text('Score: '+score,windowSize[0]/2,125)
   textSize(30)
   text('Highscore: '+highscore,windowSize[0]/2,160)
+
+
+  if (debugHUD){
+    textAlign(LEFT)
+    text("ya: "+ya,50,50)
+    text("xa: "+xa,50,100)
+    text("xPosNu: "+xposNu,50,150)
+    text("yPosNu: "+yposNu,50,200)
+    text("Collision: "+colCheck[0],50,250)
+    text("Collision +x: "+colCheck[1],50,300)
+    text("Collision -x: "+colCheck[2],50,350)
+    text("Collision +y: "+colCheck[3],50,400)
+    text("Collision -y: "+colCheck[4],50,450)
+
+  }
 }
+
 
 function ranPos(debug){
   let x = 0;
@@ -123,7 +148,7 @@ function ranPos(debug){
     y = Math.floor(Math.random() * (windowSize[1] - 0) + 0)
     useable = false;
     for (i = 0; i < boxX.length; i++){
-      if (y+pointDistance > boxY[i] && y-pointDistance < boxY[i]+boxHeight[i] && x+pointDistance > boxX[i] && x-pointDistance < boxX[i]+boxWidth[i] && boxType[i] !== 4){
+      if (y+pointDistance > boxY[i] && y < boxY[i]+boxHeight[i] && x+pointDistance > boxX[i] && x < boxX[i]+boxWidth[i] && boxType[i] !== 4){
         useable = false;
         break;
       }else{
@@ -136,7 +161,7 @@ function ranPos(debug){
   }
 
   if (debug){
-    boxGen(x,y,50,50,4)
+    boxGen(x,y,75,75,4)
   }
   return [x,y]
 }
@@ -175,6 +200,13 @@ function newBoxDraw(){
       fill (0,255,0,130)
 
       ellipse(boxX[i],boxY[i],boxWidth[i],boxHeight[i])
+      if (debug2){
+        fill(255,255,255,0)
+        stroke(255)
+        strokeWeight(2)
+        rect(boxX[i],boxY[i],boxWidth[i],boxHeight[i])
+        strokeWeight(0)
+      }
     }
   }
   ellipseMode(CENTER)
@@ -225,31 +257,38 @@ function move(){
   xh = xa
 
   //collission calculator
+  colCheck[0] = false;
+
+
   for (i = 0; i < boxX.length; i++){
     if (yposNu-yh > boxY[i]-colSize && yposNu-yh < boxY[i]+boxHeight[i]+colSize && xposNu-xh > boxX[i]-colSize && xposNu-xh < boxX[i]+boxWidth[i]+colSize){
+      colCheck[0] = true;
       if (xposNu < boxX[i]-colSize && xposNu-xh > boxX[i]-colSize){
+        colCheck[1] = true;
         if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
           death();
         }
         if (boxType[i] === 4){
           pointHit(i)
         }else{
-          yh = 0;
-          ya = 0;
+          xh = 0;
+          xa = 0;
         }
       }
       if (xposNu > boxX[i]+boxWidth[i]+colSize && xposNu-xh < boxX[i]+boxWidth[i]+colSize){
+        colCheck[2] = true;
         if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
           death();
         }
         if (boxType[i] === 4){
           pointHit(i)
         }else{
-          yh = 0;
-          ya = 0;
+          xh = 0;
+          xa = 0;
         }
       }
       if (yposNu < boxY[i]-colSize && yposNu-yh > boxY[i]-colSize){
+        colCheck[3] = true;
         if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
           death();
         }
@@ -261,6 +300,7 @@ function move(){
         }
       }
       if (yposNu > boxY[i]+boxHeight[i]+colSize && yposNu-yh < boxY[i]+boxHeight[i]+colSize){
+        colCheck[4] = true;
         if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
           death();
         }
@@ -383,5 +423,14 @@ function trailRenderer(){
     noStroke();
     fill(0+i*4, 0, 0+i*4,0+i*4);
     ellipse(xpos[i], ypos[i], i, i);
+
+  }
+
+  if (debug2){
+    fill(255,255,255,0)
+    stroke(255)
+    strokeWeight(2)
+    rect(xposNu-30,yposNu-30,60,60)
+    strokeWeight(0)
   }
 }
