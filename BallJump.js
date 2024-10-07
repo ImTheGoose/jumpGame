@@ -1,3 +1,9 @@
+debug1 = false; //Visualise spots in ranPos
+
+highscore = 0;
+score = 0;
+
+
 g = 0.3;
 f = 0.3;
 speed = 1;
@@ -16,7 +22,20 @@ boxX = [];
 boxY = [];
 boxWidth = [];
 boxHeight = [];
+//0 = none | 1 = deathbox | 2 = nonlethal | 3 = startplatform | 4 = point
+boxType = [];
 colSize = 30;
+
+const windowSize = [3200,1600]
+
+spawnXY = [windowSize[0]/2,windowSize[1]-150]
+
+
+
+pointDistance = 60;
+pointAtOnce = 5;
+
+gameStarted = false;
 
 //W,A,S,D
 pressedKeys = [false,false,false,false];
@@ -25,64 +44,145 @@ xpos = [];  // erklærer arrays
 ypos = [];
 
 function setup() {
-  createCanvas(1200, 1600);
+  createCanvas(windowSize[0], windowSize[1]);
   for (let i = 0; i < 64; i++) {
-    xpos.push(0); // giver array med 50 pladser, fra 0 til 49, hvori der er værdien 0 på alle pladser
-    ypos.push(0);
+    xpos.push(spawnXY[0]); // giver array med 50 pladser, fra 0 til 49, hvori der er værdien 0 på alle pladser
+    ypos.push(spawnXY[1]);
+  }
+  xposNu = spawnXY[0];
+  yposNu = spawnXY[1];
+
+  boxGen(0,1550,3200,50,2)
+  boxGen(0,0,50,1600,2)
+  boxGen(0,0,3200,50,2)
+  boxGen(3150,0,50,1600,2)
+
+  boxGen(1500,1500,200,100,3)
+
+  boxGen(100,100,50,100, 1);
+  boxGen(450,300,250,30, 1);
+  boxGen(850,600,200,200,1)
+  boxGen(500,800,150,150, 1)
+  boxGen(200,500,200,100, 1)
+  boxGen(250,1100,100,250, 1)
+  boxGen(700,1300,150,300, 1)
+  boxGen(900,1100,50,50, 1)
+  boxGen(1000,200,200,25, 1)
+
+  for (let i = 0; i < pointAtOnce; i++){
+    p = ranPos();
+    boxGen(p[0],p[1],50,50, 4)
   }
 
-  boxGen(100,100,50,100);
-
-  boxGen(450,300,250,30);
-
-  boxGen(0,1550,1200,50)
-
-  boxGen(850,600,200,200)
-  boxGen(500,800,150,150)
-  boxGen(200,500,200,100)
-  boxGen(250,1100,100,250)
-  boxGen(700,1300,150,300)
-  boxGen(900,1100,50,50)
-  boxGen(1000,200,200,25)
+  //frameRate(200);
 
 }
 
 function draw() {
   background(35);
   fill(100)
-  text(boxX.length,50,50,100,100)
+
+
+
   //rect(0,580,800,50,255)
 
+  if (debug1){
+    ranPos(debug1)
+  }
 
-  boxDraw();
 
+  newBoxDraw();
 
   movementCalc();
   move();
 
   trailRenderer();
 
+  if (!gameStarted){
+    checkStart();
+  }
+  drawHUD();
+
+}
+
+function drawHUD(){
+  textSize(80)
+  fill(230)
+  textStyle(BOLD)
+  textAlign(CENTER)
+  text('Score: '+score,windowSize[0]/2,125)
+  textSize(30)
+  text('Highscore: '+highscore,windowSize[0]/2,160)
+}
+
+function ranPos(debug){
+  let x = 0;
+  let y = 0;
+  for (i = 0; i < 20; i++){
+    x = Math.floor(Math.random() * (windowSize[0] - 0) + 0)
+    y = Math.floor(Math.random() * (windowSize[1] - 0) + 0)
+    useable = false;
+    for (i = 0; i < boxX.length; i++){
+      if (y+pointDistance > boxY[i] && y-pointDistance < boxY[i]+boxHeight[i] && x+pointDistance > boxX[i] && x-pointDistance < boxX[i]+boxWidth[i] && boxType[i] !== 4){
+        useable = false;
+        break;
+      }else{
+        useable = true;
+      }
+    }
+    if (useable){
+      break;
+    }
+  }
+
+  if (debug){
+    boxGen(x,y,50,50,4)
+  }
+  return [x,y]
 }
 
 //calculation and rendering of boxes in project.
-function boxGen(x,y,width,height){
+function boxGen(x,y,width,height,type){
   //adds region parameters for calculating collission later
   boxX.push(x)
   boxY.push(y)
   boxWidth.push(width)
   boxHeight.push(height)
+  boxType.push(type)
 }
 
-function boxDraw(){
+function newBoxDraw(){
   for (i = 0; i < boxX.length; i++){
-    fill(255);
-    rect(boxX[i],boxY[i],boxWidth[i],boxHeight[i])
+    if (boxType[i] === 1){
+      fill(color(45,90,255))
+      rect(boxX[i],boxY[i],boxWidth[i],boxHeight[i])
+    }
+    if (boxType[i] === 2){
+      fill(color(70))
+      rect(boxX[i],boxY[i],boxWidth[i],boxHeight[i])
+    }
+    if (boxType[i] === 3){
+      if (!gameStarted){
+        fill(color(0,150,0))
+
+      }else{
+        fill(color(45,90,255))
+      }
+      rect(boxX[i],boxY[i],boxWidth[i],boxHeight[i])
+    }
+    if (boxType[i] === 4){
+      fill (0,255,0,130)
+      ellipse(boxX[i],boxY[i],boxWidth[i],boxHeight[i])
+    }
   }
 }
 
-//calculates what to do when hitting a box
-function boxHit(){
 
+//Checks if player is out of start region
+function checkStart(){
+  if (xposNu < 1450 || xposNu > 1750 || ypos > 1450){
+    gameStarted = true;
+  }
 }
 
 //Moves the player based on pre calculated factors
@@ -116,31 +216,57 @@ function move(){
     ya = maxSpeedY;
   }
 
-  //Applies gravity and y movement
+  //Applies gravity and applies accelleration
   ya -= g
   yh = ya
-
-  //boxHit();
   xh = xa
 
   //collission calculator
   for (i = 0; i < boxX.length; i++){
     if (yposNu-yh > boxY[i]-colSize && yposNu-yh < boxY[i]+boxHeight[i]+colSize && xposNu-xh > boxX[i]-colSize && xposNu-xh < boxX[i]+boxWidth[i]+colSize){
       if (xposNu < boxX[i]-colSize && xposNu-xh > boxX[i]-colSize){
-        xh = 0;
-        xa = 0;
+        if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
+          death();
+        }
+        if (boxType[i] === 4){
+          pointHit(i)
+        }else{
+          yh = 0;
+          ya = 0;
+        }
       }
       if (xposNu > boxX[i]+boxWidth[i]+colSize && xposNu-xh < boxX[i]+boxWidth[i]+colSize){
-        xh = 0;
-        xa = 0;
+        if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
+          death();
+        }
+        if (boxType[i] === 4){
+          pointHit(i)
+        }else{
+          yh = 0;
+          ya = 0;
+        }
       }
       if (yposNu < boxY[i]-colSize && yposNu-yh > boxY[i]-colSize){
-        yh = 0;
-        ya = 0;
+        if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
+          death();
+        }
+        if (boxType[i] === 4){
+          pointHit(i)
+        }else{
+          yh = 0;
+          ya = 0;
+        }
       }
       if (yposNu > boxY[i]+boxHeight[i]+colSize && yposNu-yh < boxY[i]+boxHeight[i]+colSize){
-        yh = 0;
-        ya = 0;
+        if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
+          death();
+        }
+        if (boxType[i] === 4){
+          pointHit(i)
+        }else{
+          yh = 0;
+          ya = 0;
+        }
       }
 
       //xh += 200;
@@ -148,23 +274,49 @@ function move(){
   }
 
 
-
+  //applies x and y movement
   yposNu -= yh
+  xposNu -= xh
+}
 
-  //Makes sure the ball doesnt run through the ground.
-  /*
-  if (yposNu > 550){
-    yh = 0;
-    ya = 0;
-    yposNu = 550;
+function death(){
+  xposNu = spawnXY[0];
+  yposNu = spawnXY[1];
+  gameStarted = false;
+
+  for (let i = 0; i < boxX.length; i++){
+    if (boxType[i] === 4){
+      let p = ranPos();
+      boxX[i] = p[0];
+      boxY[i] = p[1];
+    }
   }
+
+  score = 0;
+  /*
+  boxX.length = 0;
+  boxY.length = 0;
+  boxWidth.length = 0;
+  boxHeight.length = 0;
+  boxType.length = 0;
+  xpos.length = 0;
+  ypos.length = 0;
+  setup();
 
    */
 
-  //applies x movement
-
-  xposNu -= xh
 }
+
+function pointHit(index){
+  let p = ranPos();
+  boxX[index] = p[0];
+  boxY[index] = p[1];
+  score += 1;
+  if (highscore < score){
+    highscore = score;
+  }
+}
+
 
 //calculates and applies acceleration based on active keys
 function movementCalc(){
