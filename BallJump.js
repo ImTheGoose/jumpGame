@@ -152,6 +152,7 @@ function boxGen(x,y,width,height,type){
 }
 
 function newBoxDraw(){
+  ellipseMode(CORNER)
   for (i = 0; i < boxX.length; i++){
     if (boxType[i] === 1){
       fill(color(45,90,255))
@@ -172,9 +173,11 @@ function newBoxDraw(){
     }
     if (boxType[i] === 4){
       fill (0,255,0,130)
+
       ellipse(boxX[i],boxY[i],boxWidth[i],boxHeight[i])
     }
   }
+  ellipseMode(CENTER)
 }
 
 
