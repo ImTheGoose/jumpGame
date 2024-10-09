@@ -1,61 +1,64 @@
-debugHUD = false; //Enables or disables debug hub
-debug1 = false; //Visualise spots in ranPos
-debug2 = false; //Visualise hitboxes
+//Debug settings
+const debugHUD = false; //Enables or disables debug hub
+const debug1 = false; //Visualise spots in ranPos
+const debug2 = false; //Visualise hitboxes
 
+//Debug variables
+let colCheck = [false, false, false, false, false];
 
-highscore = 0;
-score = 0;
+//Stats
+let highscore = 0;
+let score = 0;
 
+//Movement related
+const g = 0.3;
+const f = 0.3;
+const speed = 1;
+const maxSpeed = 10;
+const maxSpeedN = -10;
+const maxSpeedY = 8;
+const jumpSpeed = 1.5;
 
-g = 0.3;
-f = 0.3;
-speed = 1;
-maxSpeed = 10;
-maxSpeedN = -10;
-maxSpeedY = 8;
-jumpSpeed = 1.5;
-yh = 0
-ya = 0
-xa = 0
-xh = 0
-xposNu = 100;
-yposNu = 100;
+//Active movement trackers
+let yh = 0
+let ya = 0
+let xa = 0
+let xh = 0;
+let xposNu = 100;
+let yposNu = 100;
+//Active keys [W,A,S,D]
+let pressedKeys = [false,false,false,false];
 
-colCheck = [false, false, false, false, false];
-
-boxX = [];
-boxY = [];
-boxWidth = [];
-boxHeight = [];
+//Collision data
+let boxX = [];
+let boxY = [];
+let boxWidth = [];
+let boxHeight = [];
 //0 = none | 1 = deathbox | 2 = nonlethal | 3 = startplatform | 4 = point
-boxType = [];
-boxColSize = [];
-colSizeDB = 15;
-colSizePoint = 35;
-colSizeNonLethal = 30;
-colSizeDefault = 0;
+let boxType = [];
+let boxColSize = [];
+const colSizeDB = 15;
+const colSizePoint = 35;
+const colSizeNonLethal = 30;
+const colSizeDefault = 0;
 
+//Other stuff
 const windowSize = [3200,1600]
+const spawnXY = [windowSize[0]/2,windowSize[1]-150]
+let gameStarted = false;
+let xpos = [];  // For trails
+let ypos = []; // For trails
 
-spawnXY = [windowSize[0]/2,windowSize[1]-150]
+//point settings
+const pointDistance = 80;
+const pointAtOnce = 5;
 
 
-
-pointDistance = 80;
-pointAtOnce = 5;
-
-gameStarted = false;
-
-//W,A,S,D
-pressedKeys = [false,false,false,false];
-
-xpos = [];  // erklærer arrays
-ypos = [];
-
-let test;
 
 function setup() {
   createCanvas(windowSize[0], windowSize[1]);
+
+  //Trail primer
   for (let i = 0; i < 64; i++) {
     xpos.push(spawnXY[0]); // giver array med 50 pladser, fra 0 til 49, hvori der er værdien 0 på alle pladser
     ypos.push(spawnXY[1]);
@@ -63,59 +66,21 @@ function setup() {
   xposNu = spawnXY[0];
   yposNu = spawnXY[1];
 
+  //Data lodaing
   highscore = localStorage.getItem("hs")
   if (highscore === null){
     highscore = 0;
     localStorage.setItem("hs",0)
   }
-  frameRate(63)
 
-  boxGen(0,1550,3200,50,2)
-  boxGen(0,0,50,1600,2)
-  boxGen(0,0,3200,50,2)
-  boxGen(3150,0,50,1600,2)
+  frameRate(63);
+  genMap();
 
-  boxGen(1500,1500,200,100,3)
-
-  boxGen(100,100,50,100, 1);
-  boxGen(450,300,250,30, 1);
-  boxGen(850,600,200,200,1)
-  boxGen(500,800,150,150, 1)
-  boxGen(200,500,200,100, 1)
-  boxGen(250,1100,100,250, 1)
-  boxGen(700,1300,150,300, 1)
-  boxGen(900,1100,50,50, 1)
-  boxGen(1000,200,200,25, 1)
-  boxGen(2000,300,50,250, 1)
-  boxGen(1850,750,100,100, 1)
-  boxGen(2500,200,50,300, 1)
-
-
-  boxGen(2200,1300,500,25, 1)
-  boxGen(2200,1050,250,25, 1)
-  boxGen(2650,1050,50,25, 1)
-
-  boxGen(2300,200,200,50, 1)
-  boxGen(2250,450,50,50, 1)
-  boxGen(2500,200,50,300, 1)
-
-  boxGen(1500,300,150,150, 1)
-  boxGen(1300,600,50,50, 1)
-  boxGen(1600,900,100,100, 1)
-  boxGen(1200,1200,150,150, 1)
-
-  boxGen(2800,400,100,300, 1)
-  boxGen(2900,900,100,100, 1)
-
-
-
+  //Initial point generation
   for (let i = 0; i < pointAtOnce; i++){
     p = ranPos();
     boxGen(p[0],p[1],75,75, 4)
   }
-
-
-
 }
 
 function draw() {
@@ -126,29 +91,19 @@ function draw() {
   xposNu += 0.0000000000001;
   yposNu += 0.0000000000001;
 
-
-
-
-  //rect(0,580,800,50,255)
-
   if (debug1){
     ranPos(debug1)
     frameRate(200);
   }
 
-
   newBoxDraw();
-
   movementCalc();
   move();
-
   trailRenderer();
-
   if (!gameStarted){
     checkStart();
   }
   drawHUD();
-
 }
 
 function drawHUD(){
@@ -159,7 +114,6 @@ function drawHUD(){
   text('Score: '+score,windowSize[0]/2,125)
   textSize(30)
   text('Highscore: '+highscore,windowSize[0]/2,160)
-
 
   if (debugHUD){
     textAlign(LEFT)
@@ -176,8 +130,40 @@ function drawHUD(){
   }
 }
 
+function genMap(){
+  boxGen(0,1550,3200,50,2)
+  boxGen(0,0,50,1600,2)
+  boxGen(0,0,3200,50,2)
+  boxGen(3150,0,50,1600,2)
+  boxGen(1500,1500,200,100,3)
+  boxGen(100,100,50,100, 1);
+  boxGen(450,300,250,30, 1);
+  boxGen(850,600,200,200,1)
+  boxGen(500,800,150,150, 1)
+  boxGen(200,500,200,100, 1)
+  boxGen(250,1100,100,250, 1)
+  boxGen(700,1300,150,300, 1)
+  boxGen(900,1100,50,50, 1)
+  boxGen(1000,200,200,25, 1)
+  boxGen(2000,300,50,250, 1)
+  boxGen(1850,750,100,100, 1)
+  boxGen(2500,200,50,300, 1)
+  boxGen(2200,1300,500,25, 1)
+  boxGen(2200,1050,250,25, 1)
+  boxGen(2650,1050,50,25, 1)
+  boxGen(2300,200,200,50, 1)
+  boxGen(2250,450,50,50, 1)
+  boxGen(2500,200,50,300, 1)
+  boxGen(1500,300,150,150, 1)
+  boxGen(1300,600,50,50, 1)
+  boxGen(1600,900,100,100, 1)
+  boxGen(1200,1200,150,150, 1)
+  boxGen(2800,400,100,300, 1)
+  boxGen(2900,900,100,100, 1)
+}
 
 function ranPos(debug){
+  //Creates a random X and Y position that doesn't touch a box
   let x = 0;
   let y = 0;
   for (let ii = 0; ii < 20; ii++){
@@ -211,7 +197,8 @@ function boxGen(x,y,width,height,type){
   boxWidth.push(width)
   boxHeight.push(height)
   boxType.push(type)
-  
+
+  //Assigns collision size as type dependant
   if (type === 1){
     boxColSize.push(colSizeDB)
   }else if (type === 2 || type === 3){
@@ -224,6 +211,7 @@ function boxGen(x,y,width,height,type){
 }
 
 function newBoxDraw(){
+  //Draws a box in a style according to its type.
   ellipseMode(CORNER)
   for (i = 0; i < boxX.length; i++){
     if (boxType[i] === 1){
@@ -260,15 +248,17 @@ function newBoxDraw(){
 }
 
 
-//Checks if player is out of start region
+
 function checkStart(){
+  //Checks if player is out of start region
   if (xposNu < 1450 || xposNu > 1750 || ypos > 1450){
     gameStarted = true;
   }
 }
 
-//Moves the player based on pre calculated factors
+
 function move(){
+  //Moves the player based on pre calculated factors
   //applies friction and limits velocity
   if (xa < 0){
     xa += f
@@ -276,7 +266,6 @@ function move(){
     if (xa > 0){
       xa = 0;
     }
-    //Make sure that ball doesnt exceed max speed in negative direction.
     if (xa < maxSpeedN){
       xa = maxSpeedN;
     }
@@ -288,12 +277,10 @@ function move(){
     if (xa < 0){
       xa = 0;
     }
-    //Makes sure that ball doesnt exceed max speed
     if (xa > maxSpeed){
       xa = maxSpeed;
     }
   }
-
   if (ya > maxSpeedY){
     ya = maxSpeedY;
   }
@@ -305,8 +292,6 @@ function move(){
 
   //collission calculator
   colCheck[0] = false;
-
-
   for (i = 0; i < boxX.length; i++){
     if (yposNu-yh > boxY[i]-boxColSize[i] && yposNu-yh < boxY[i]+boxHeight[i]+boxColSize[i] && xposNu-xh > boxX[i]-boxColSize[i] && xposNu-xh < boxX[i]+boxWidth[i]+boxColSize[i]){
       colCheck[0] = true;
@@ -358,22 +343,20 @@ function move(){
           ya = 0;
         }
       }
-
-      //xh += 200;
     }
   }
-
-
-  //applies x and y movement
+  //applies x and y movement to position
   yposNu -= yh
   xposNu -= xh
 }
 
 function death(){
+  //Resets all variables to default and saves data
   xposNu = spawnXY[0];
   yposNu = spawnXY[1];
   gameStarted = false;
 
+  //Repositions points on screen.
   for (let i = 0; i < boxX.length; i++){
     if (boxType[i] === 4){
       let p = ranPos();
@@ -383,23 +366,11 @@ function death(){
   }
 
   localStorage.setItem("hs",highscore)
-
   score = 0;
-  /*
-  boxX.length = 0;
-  boxY.length = 0;
-  boxWidth.length = 0;
-  boxHeight.length = 0;
-  boxType.length = 0;
-  xpos.length = 0;
-  ypos.length = 0;
-  setup();
-
-   */
-
 }
 
 function pointHit(index){
+  //Function for handeling a point interaction
   let p = ranPos();
   boxX[index] = p[0];
   boxY[index] = p[1];
@@ -409,9 +380,8 @@ function pointHit(index){
   }
 }
 
-
-//calculates and applies acceleration based on active keys
 function movementCalc(){
+  //calculates and applies acceleration based on active keys
   if (pressedKeys[0]){
     ya += jumpSpeed-(ya/maxSpeedY);
   }
@@ -426,8 +396,8 @@ function movementCalc(){
   }
 }
 
-//Register a key as pressed.
 function keyPressed(){
+  //Register a key as pressed.
   if (key === 'w'){
     pressedKeys[0] = true;
   }
@@ -442,8 +412,8 @@ function keyPressed(){
   }
 }
 
-//Registers that a key has been let go
 function keyReleased(){
+  //Registers that a key has been let go
   if (key === 'w'){
     pressedKeys[0] = false;
   }
@@ -458,16 +428,18 @@ function keyReleased(){
   }
 }
 
-//Ball and trail renderer.
+
 function trailRenderer(){
+  //Ball and trail renderer.
+  //Shift positions and adds current position
   for (let i = 0; i < xpos.length - 1; i++) {
-    xpos[i] = xpos[i + 1];  // flytte værdierne rundt - altså værdien på plads 48 sættes ind i plads 47
+    xpos[i] = xpos[i + 1];
     ypos[i] = ypos[i + 1];
   }
-  xpos[xpos.length - 1] = xposNu; // sætter aktuel position i slutningen af arrayet
+  xpos[xpos.length - 1] = xposNu;
   ypos[ypos.length - 1] = yposNu;
 
-// tegner tingene - løber array'en igennem og bruger også i til at sætte farve samt størrelse
+  //draws ball and trail
   for (let i = 0; i < xpos.length; i++) {
     noStroke();
     fill(0+i*4, 0, 0+i*4,0+i*4);
@@ -475,6 +447,7 @@ function trailRenderer(){
 
   }
 
+  //Hitbox of player for debuggin
   if (debug2){
     fill(255,255,255,0)
     stroke(255)
