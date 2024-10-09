@@ -1,6 +1,6 @@
-debugHUD = true; //Enables or disables debug hub
+debugHUD = false; //Enables or disables debug hub
 debug1 = false; //Visualise spots in ranPos
-debug2 = true; //Visualise hitboxes
+debug2 = false; //Visualise hitboxes
 
 
 highscore = 0;
@@ -29,7 +29,11 @@ boxWidth = [];
 boxHeight = [];
 //0 = none | 1 = deathbox | 2 = nonlethal | 3 = startplatform | 4 = point
 boxType = [];
-colSize = 30;
+boxColSize = [];
+colSizeDB = 15;
+colSizePoint = 35;
+colSizeNonLethal = 30;
+colSizeDefault = 0;
 
 const windowSize = [3200,1600]
 
@@ -175,6 +179,16 @@ function boxGen(x,y,width,height,type){
   boxWidth.push(width)
   boxHeight.push(height)
   boxType.push(type)
+  
+  if (type === 1){
+    boxColSize.push(colSizeDB)
+  }else if (type === 2 || type === 3){
+    boxColSize.push(colSizeNonLethal)
+  }else if (type === 4){
+    boxColSize.push(colSizePoint)
+  }else{
+    boxColSize.push(colSizeDefault)
+  }
 }
 
 function newBoxDraw(){
@@ -262,9 +276,9 @@ function move(){
 
 
   for (i = 0; i < boxX.length; i++){
-    if (yposNu-yh > boxY[i]-colSize && yposNu-yh < boxY[i]+boxHeight[i]+colSize && xposNu-xh > boxX[i]-colSize && xposNu-xh < boxX[i]+boxWidth[i]+colSize){
+    if (yposNu-yh > boxY[i]-boxColSize[i] && yposNu-yh < boxY[i]+boxHeight[i]+boxColSize[i] && xposNu-xh > boxX[i]-boxColSize[i] && xposNu-xh < boxX[i]+boxWidth[i]+boxColSize[i]){
       colCheck[0] = true;
-      if (xposNu < boxX[i]-colSize && xposNu-xh > boxX[i]-colSize){
+      if (xposNu < boxX[i]-boxColSize[i] && xposNu-xh > boxX[i]-boxColSize[i]){
         colCheck[1] = true;
         if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
           death();
@@ -276,7 +290,7 @@ function move(){
           xa = 0;
         }
       }
-      if (xposNu > boxX[i]+boxWidth[i]+colSize && xposNu-xh < boxX[i]+boxWidth[i]+colSize){
+      if (xposNu > boxX[i]+boxWidth[i]+boxColSize[i] && xposNu-xh < boxX[i]+boxWidth[i]+boxColSize[i]){
         colCheck[2] = true;
         if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
           death();
@@ -288,7 +302,7 @@ function move(){
           xa = 0;
         }
       }
-      if (yposNu < boxY[i]-colSize && yposNu-yh > boxY[i]-colSize){
+      if (yposNu < boxY[i]-boxColSize[i] && yposNu-yh > boxY[i]-boxColSize[i]){
         colCheck[3] = true;
         if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
           death();
@@ -300,7 +314,7 @@ function move(){
           ya = 0;
         }
       }
-      if (yposNu > boxY[i]+boxHeight[i]+colSize && yposNu-yh < boxY[i]+boxHeight[i]+colSize){
+      if (yposNu > boxY[i]+boxHeight[i]+boxColSize[i] && yposNu-yh < boxY[i]+boxHeight[i]+boxColSize[i]){
         colCheck[4] = true;
         if (boxType[i] === 1 || boxType[i] === 3 && gameStarted){
           death();
