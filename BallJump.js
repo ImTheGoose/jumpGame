@@ -52,6 +52,8 @@ pressedKeys = [false,false,false,false];
 xpos = [];  // erklærer arrays
 ypos = [];
 
+let test;
+
 function setup() {
   createCanvas(windowSize[0], windowSize[1]);
   for (let i = 0; i < 64; i++) {
@@ -78,6 +80,28 @@ function setup() {
   boxGen(700,1300,150,300, 1)
   boxGen(900,1100,50,50, 1)
   boxGen(1000,200,200,25, 1)
+  boxGen(2000,300,50,250, 1)
+  boxGen(1850,750,100,100, 1)
+  boxGen(2500,200,50,300, 1)
+
+
+  boxGen(2200,1300,500,25, 1)
+  boxGen(2200,1050,250,25, 1)
+  boxGen(2650,1050,50,25, 1)
+
+  boxGen(2300,200,200,50, 1)
+  boxGen(2250,450,50,50, 1)
+  boxGen(2500,200,50,300, 1)
+
+  boxGen(1500,300,150,150, 1)
+  boxGen(1300,600,50,50, 1)
+  boxGen(1600,900,100,100, 1)
+  boxGen(1200,1200,150,150, 1)
+
+  boxGen(2800,400,100,300, 1)
+  boxGen(2900,900,100,100, 1)
+
+
 
   for (let i = 0; i < pointAtOnce; i++){
     p = ranPos();
@@ -95,6 +119,8 @@ function draw() {
   //Bugfix for ghosting through wall. DONT REMOVE. Phasing happens when float is an integer.
   xposNu += 0.0000000000001;
   yposNu += 0.0000000000001;
+
+
 
 
   //rect(0,580,800,50,255)
@@ -148,7 +174,7 @@ function drawHUD(){
 function ranPos(debug){
   let x = 0;
   let y = 0;
-  for (i = 0; i < 20; i++){
+  for (let ii = 0; ii < 20; ii++){
     x = Math.floor(Math.random() * (windowSize[0] - 0) + 0)
     y = Math.floor(Math.random() * (windowSize[1] - 0) + 0)
     useable = false;
@@ -379,7 +405,7 @@ function pointHit(index){
 //calculates and applies acceleration based on active keys
 function movementCalc(){
   if (pressedKeys[0]){
-    ya += jumpSpeed;
+    ya += jumpSpeed-(ya/maxSpeedY);
   }
   if (pressedKeys[1]){
     xa += speed;
