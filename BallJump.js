@@ -62,6 +62,12 @@ function setup() {
   }
   xposNu = spawnXY[0];
   yposNu = spawnXY[1];
+
+  highscore = localStorage.getItem("hs")
+  if (highscore === null){
+    highscore = 0;
+    localStorage.setItem("hs",0)
+  }
   frameRate(63)
 
   boxGen(0,1550,3200,50,2)
@@ -375,6 +381,8 @@ function death(){
       boxY[i] = p[1];
     }
   }
+
+  localStorage.setItem("hs",highscore)
 
   score = 0;
   /*
