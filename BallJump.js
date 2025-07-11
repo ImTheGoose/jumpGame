@@ -43,7 +43,7 @@ const colSizeNonLethal = 30;
 const colSizeDefault = 0;
 
 //Other stuff
-const windowSize = [3200,1600]
+const windowSize = [3840,2160]
 const spawnXY = [windowSize[0]/2,windowSize[1]-150]
 let gameStarted = false;
 let xpos = [];  // For trails
@@ -56,7 +56,7 @@ const pointAtOnce = 5;
 
 
 function setup() {
-  createCanvas(windowSize[0], windowSize[1]);
+  createCanvas(windowWidth, windowHeight);
 
   //Trail primer
   for (let i = 0; i < 64; i++) {
@@ -83,9 +83,14 @@ function setup() {
   }
 }
 
+function windowResized(){
+  resizeCanvas(windowWidth, windowHeight)
+}
+
 function draw() {
   background(35);
   fill(100)
+  scale(windowWidth/windowSize[0])
 
   //Bugfix for ghosting through wall. DONT REMOVE. Phasing happens when float is an integer.
   xposNu += 0.0000000000001;
@@ -131,11 +136,11 @@ function drawHUD(){
 }
 
 function genMap(){
-  boxGen(0,1550,3200,50,2)
-  boxGen(0,0,50,1600,2)
-  boxGen(0,0,3200,50,2)
-  boxGen(3150,0,50,1600,2)
-  boxGen(1500,1500,200,100,3)
+  boxGen(0,windowSize[1]-50,windowSize[0],50,2)
+  boxGen(0,0,50,windowSize[1],2)
+  boxGen(0,0,windowSize[0],50,2)
+  boxGen(windowSize[0]-50,0,50,windowSize[1],2)
+  boxGen(windowSize[0]/2-100,windowSize[1]-100,200,100,3)
   boxGen(100,100,50,100, 1);
   boxGen(450,300,250,30, 1);
   boxGen(850,600,200,200,1)
@@ -251,7 +256,7 @@ function newBoxDraw(){
 
 function checkStart(){
   //Checks if player is out of start region
-  if (xposNu < 1450 || xposNu > 1750 || ypos > 1450){
+  if (xposNu < windowSize[0]/2-150 || xposNu > windowSize[0]/2+150 || yposNu < windowSize[1]-350){
     gameStarted = true;
   }
 }
