@@ -48,6 +48,7 @@ const spawnXY = [windowSize[0]/2,windowSize[1]-150]
 let gameStarted = false;
 let xpos = [];  // For trails
 let ypos = []; // For trails
+let isFullscreen = false
 
 //point settings
 const pointDistance = 80;
@@ -431,6 +432,12 @@ function keyReleased(){
   if (key === 'd'){
     pressedKeys[3] = false;
   }
+
+  if (key === 'f'){
+    isFullscreen = !isFullscreen
+    fullscreen(isFullscreen)
+  }
+
 }
 
 
